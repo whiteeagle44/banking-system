@@ -6,24 +6,31 @@ public class Account {
     private final Card card;
     private int balance = 0;
 
+    public Account(String number, int pin, int balance) {
+        this.balance = balance;
+        card = new Card(number, pin);
+    }
+
     private class Card {
-        private final int BIN = 400000;
-        private final int accountIdentifier;
-        private final int CHECKSUM;
         private final int PIN;
+        private final String number;
 
         public Card() {
             System.out.println("Your card has been created");
-            accountIdentifier = new Random().nextInt(999_999_999 - 100_000_000 + 1) + 100_000_000;
-            CHECKSUM = generateChecksum();
             System.out.println("Your card number:");
-            System.out.println(getCardNumber());
+            this.number = generateCardNumber();
+            System.out.println(number);
             PIN = generatePIN();
             System.out.println("Your card PIN:");
             System.out.println(PIN);
         }
 
-        private int generateChecksum() {
+        public Card(String number, int PIN) {
+            this.number = number;
+            this.PIN = PIN;
+        }
+
+        private int generateChecksum(int BIN, int accountIdentifier) {
             String currentNumber = "" + BIN + accountIdentifier;
             int sum = 0;
             for (int i = 0; i < currentNumber.length(); i++) {
@@ -42,8 +49,19 @@ public class Account {
             return 10 - (sum % 10) != 10 ? 10 - (sum % 10) : 0;
         }
 
-        private String getCardNumber() {
-            return "" + BIN + accountIdentifier + CHECKSUM;
+        public String generateCardNumber() {
+            int BIN = 400000;
+            int accountIdentifier = new Random().nextInt(999_999_999 - 100_000_000 + 1) + 100_000_000;
+            int checksum = generateChecksum(BIN, accountIdentifier);
+            return "" + 400000 + accountIdentifier + checksum;
+        }
+
+        public int getPIN() {
+            return PIN;
+        }
+
+        public String getNumber() {
+            return number;
         }
 
         private int generatePIN() {
@@ -56,7 +74,7 @@ public class Account {
     }
 
     public boolean validateCardNumber(String cardNumberInput) {
-        return card.getCardNumber().equals(cardNumberInput);
+        return card.getNumber().equals(cardNumberInput);
     }
 
     public boolean validatePIN(int PINInput) {
@@ -66,4 +84,14 @@ public class Account {
     public int getBalance() {
         return balance;
     }
+
+    public String getCardNumber() {
+        return card.getNumber();
+    }
+
+    public int getPin() {
+        return card.getPIN();
+    }
+
+
 }

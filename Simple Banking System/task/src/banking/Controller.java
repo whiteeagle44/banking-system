@@ -8,14 +8,17 @@ public class Controller {
     private CurrentMenu currentMenu = CurrentMenu.MAIN;
     private final Scanner scanner;
     private int loggedIndex = -1;
+    private final Database database;
 
     private enum CurrentMenu {
         MAIN, LOGGED_IN
     }
 
-    Controller(Scanner scanner) {
+    Controller(Scanner scanner, Database database) {
         accounts = new ArrayList<>();
         this.scanner = scanner;
+        this.database = database;
+        this.database.fetchFromDatabase(accounts);
     }
 
     public void run() {
@@ -28,7 +31,9 @@ public class Controller {
                     System.exit(0);
                     break;
                 case 1:
-                    accounts.add(new Account());
+                    Account account = new Account();
+                    accounts.add(account);
+                    database.insert(account);
                     break;
                 case 2:
                     logIn();
