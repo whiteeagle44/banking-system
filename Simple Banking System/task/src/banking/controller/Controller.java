@@ -1,24 +1,23 @@
-package banking;
+package banking.controller;
 
-import java.util.ArrayList;
+import banking.dao.JdbcCardDAO;
+import banking.model.Card;
+
 import java.util.Scanner;
 
 public class Controller {
-    private final ArrayList<Account> accounts;
     private CurrentMenu currentMenu = CurrentMenu.MAIN;
     private final Scanner scanner;
-    private int loggedIndex = -1;
-    private final Database database;
+    private final JdbcCardDAO jdbcCardDAO;
+    private Card card; // card that's currently logged in
 
     private enum CurrentMenu {
         MAIN, LOGGED_IN
     }
 
-    Controller(Scanner scanner, Database database) {
-        accounts = new ArrayList<>();
+    public Controller(Scanner scanner, JdbcCardDAO jdbcCardDAO) {
         this.scanner = scanner;
-        this.database = database;
-        this.database.fetchFromDatabase(accounts);
+        this.jdbcCardDAO = jdbcCardDAO;
     }
 
     public void run() {
@@ -31,9 +30,8 @@ public class Controller {
                     System.exit(0);
                     break;
                 case 1:
-                    Account account = new Account();
-                    accounts.add(account);
-                    database.insert(account);
+                    Card card = new Card();
+                    jdbcCardDAO.add(card);
                     break;
                 case 2:
                     logIn();
@@ -52,7 +50,7 @@ public class Controller {
                     System.exit(0);
                     break;
                 case 1:
-                    System.out.println("Balance: " + accounts.get(loggedIndex).getBalance());
+                    System.out.println("Balance: " + card.getBalance());
                     break;
                 case 2:
                     System.out.println("You have successfully logged out!");
@@ -66,21 +64,18 @@ public class Controller {
     }
 
     private void logIn() {
-        System.out.println("Enter your card number:");
-        System.out.print(">");
+        System.out.print("Enter your card number:\n>");
         String cardNumberInput = scanner.next();
-        System.out.println("Enter your PIN:");
-        System.out.print(">");
-        int PINInput = scanner.nextInt();
-        for (int i = 0; i < accounts.size(); i++) {
-            if (accounts.get(i).validateCardNumber((cardNumberInput)) && accounts.get(i).validatePIN((PINInput))) {
-                loggedIndex = i;
-                currentMenu = CurrentMenu.LOGGED_IN;
-                System.out.println("You have successfully logged in!");
-                return;
-            }
+        System.out.print("Enter your pin:\n>");
+        String pinInput = scanner.next();
+
+        card = jdbcCardDAO.findByNumberAndPin(cardNumberInput, pinInput);
+        if (card.getBalance() == -1) {
+            System.out.println("Wrong card number or PIN!");
+            return;
         }
-        System.out.println("Wrong card number or PIN!");
+        currentMenu = CurrentMenu.LOGGED_IN;
+        System.out.println("You have successfully logged in!");
     }
 
     private void printCurrentMenu() {
@@ -95,4 +90,5 @@ public class Controller {
             System.out.println("0. Exit");
         }
     }
+
 }

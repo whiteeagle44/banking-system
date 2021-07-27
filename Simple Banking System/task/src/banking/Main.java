@@ -1,5 +1,8 @@
 package banking;
 
+import banking.controller.Controller;
+import banking.dao.JdbcCardDAO;
+
 import java.util.Scanner;
 
 import static java.lang.System.exit;
@@ -14,9 +17,8 @@ public class Main {
             exit(-2);
         }
         databaseName = clp.getArgumentValue("fileName")[0];
-        System.out.println(databaseName);
-        Database database = new Database(databaseName);
-        Controller controller = new Controller(scanner, database);
+        JdbcCardDAO jdbcCardDAO = new JdbcCardDAO(databaseName);
+        Controller controller = new Controller(scanner, jdbcCardDAO);
         for (int i = 0; i < 100; i++) {
             controller.run();
         }
