@@ -42,19 +42,39 @@ public class Card {
     }
 
     private String generatePin() {
-        return String.valueOf(new Random().nextInt((9999 - 1000 + 1) + 1000)); // in range <1000, 9999>
+        return String.valueOf(new Random().nextInt(9999 - 1000 + 1) + 1000); // in range <1000, 9999>
     }
 
     private String generateCardNumber() {
         String BIN = "400000";
         String accountIdentifier = String.valueOf(new Random().nextInt(999_999_999 - 100_000_000 + 1) + 100_000_000); // in range <100_000_000, 999_999_999>
-        int checksum = generateChecksum(BIN, accountIdentifier);
+        int checksum = generateChecksum(BIN + accountIdentifier);
         return BIN + accountIdentifier + checksum;
     }
 
+    public boolean addToBalance(int income) {
+        if (income > 0) {
+            balance += income;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean subtractFromBalance(int amount) {
+        if (amount <= balance) {
+            balance -= amount;
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean validateChecksum(String number) {
+        return generateChecksum(number.substring(0, number.length() - 1))
+                == Integer.parseInt(number.substring(number.length() - 1, number.length()));
+    }
+
     // implements Luhn's algorithm
-    private int generateChecksum(String BIN, String accountIdentifier) {
-        String currentNumber = BIN + accountIdentifier;
+    private static int generateChecksum(String currentNumber) {
         int sum = 0;
         for (int i = 0; i < currentNumber.length(); i++) {
             int num = Character.getNumericValue(currentNumber.charAt(i));
