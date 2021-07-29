@@ -8,8 +8,7 @@ public class JdbcCardDAO implements CardDAO{
     private final String url;
 
     public JdbcCardDAO(String fileName) {
-//        url = "jdbc:sqlite:Simple Banking System\\task\\" + fileName;
-        url = "jdbc:sqlite:" + fileName;
+        url = "jdbc:sqlite:Simple Banking System\\task\\" + fileName;
 
         try (Connection conn = this.connect();
              Statement stmt = conn.createStatement()) {
@@ -20,14 +19,16 @@ public class JdbcCardDAO implements CardDAO{
     }
 
     @Override
-    public void add(Card card) {
+    public boolean add(Card card) {
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(INSERT)) {
             pstmt.setString(1, card.getNumber());
             pstmt.setString(2, card.getPin());
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            return false;
         }
     }
 
@@ -55,38 +56,69 @@ public class JdbcCardDAO implements CardDAO{
     }
 
     @Override
-    public void addToBalance(int income, String number) {
+    public boolean addToBalance(int income, String number) {
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(ADD_TO_BALANCE)) {
             pstmt.setInt(1, income);
             pstmt.setString(2, number);
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            return false;
         }
     }
 
     @Override
-    public void subtractFromBalance(int amount, String number) {
+    public boolean transferMoney(int amount, String fromNumber, String toNumber) {
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(SUBTRACT_FROM_BALANCE)) {
-            pstmt.setInt(1, amount);
-            pstmt.setString(2, number);
-            pstmt.executeUpdate();
+             PreparedStatement pstmtSubtract = conn.prepareStatement(SUBTRACT_FROM_BALANCE);
+             PreparedStatement pstmtAdd = conn.prepareStatement(ADD_TO_BALANCE)) {
+
+            conn.setAutoCommit(false);
+
+            pstmtSubtract.setInt(1, amount);
+            pstmtSubtract.setString(2, fromNumber);
+            pstmtSubtract.executeUpdate();
+
+            pstmtAdd.setInt(1, amount);
+            pstmtAdd.setString(2, toNumber);
+            pstmtAdd.executeUpdate();
+
+            conn.commit();
+            return true;
+
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            return false;
         }
     }
 
+//    @Override
+//    public boolean subtractFromBalance(int amount, String number) {
+//        try (Connection conn = this.connect();
+//             PreparedStatement pstmt = conn.prepareStatement(SUBTRACT_FROM_BALANCE)) {
+//            pstmt.setInt(1, amount);
+//            pstmt.setString(2, number);
+//            pstmt.executeUpdate();
+//            return true;
+//        } catch (SQLException e) {
+//            System.out.println(e.getMessage());
+//            return false;
+//        }
+//    }
+
     @Override
-    public void delete(Card card) {
+    public boolean delete(Card card) {
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(DELETE)) {
             pstmt.setString(1, card.getNumber());
             pstmt.setString(2, card.getPin());
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            return false;
         }
     }
 

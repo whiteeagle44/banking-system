@@ -33,14 +33,6 @@ public class Card {
         this.balance = balance;
     }
 
-    public boolean validatePIN(String PIN) {
-        return this.pin.equals(PIN);
-    }
-
-    public boolean validateNumber(String number) {
-        return this.number.equals(number);
-    }
-
     private String generatePin() {
         return String.valueOf(new Random().nextInt(9999 - 1000 + 1) + 1000); // in range <1000, 9999>
     }

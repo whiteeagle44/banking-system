@@ -1,10 +1,11 @@
 package banking.dao;
 
 public interface DAO<T> {
-    void add(T element);
+    boolean add(T element);
     T findByNumberAndPin(String number, String pin);
-    void addToBalance(int income, String number);
-    void subtractFromBalance(int amount, String number);
-    void delete(T element);
+    boolean addToBalance(int income, String number);
+    boolean transferMoney(int amount, String fromNumber, String toNumber);
+//    boolean subtractFromBalance(int amount, String number);
+    boolean delete(T element);
     boolean exists(String number);
 }

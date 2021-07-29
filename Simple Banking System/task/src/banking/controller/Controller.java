@@ -42,7 +42,7 @@ public class Controller {
                     break;
                 case 1:
                     Card card = new Card();
-                    jdbcCardDAO.add(card);
+                    if (!jdbcCardDAO.add(card)) System.out.println("Operation aborted.");
                     break;
                 case 2:
                     logIn();
@@ -70,9 +70,12 @@ public class Controller {
                     transferFunds();
                     break;
                 case 4:
-                    jdbcCardDAO.delete(card);
-                    currentMenu = CurrentMenu.MAIN;
-                    System.out.println("The account has been closed!");
+                    if (jdbcCardDAO.delete(card)) {
+                        System.out.println("The account has been closed!");
+                        currentMenu = CurrentMenu.MAIN;
+                    } else {
+                        System.out.println("Operation aborted.");
+                    }
                     break;
                 case 5:
                     System.out.println("You have successfully logged out!");
@@ -104,8 +107,12 @@ public class Controller {
         System.out.print("Enter income:\n>");
         int income = scanner.nextInt();
         if (card.addToBalance(income)) {
-            jdbcCardDAO.addToBalance(income, card.getNumber());
-            System.out.println("Income was added!");
+            if (jdbcCardDAO.addToBalance(income, card.getNumber())) {
+                System.out.println("Income was added!");
+            } else {
+                System.out.println("Operation aborted.");
+            }
+
         } else {
             System.out.println("Income must be a positive integer number.");
         }
@@ -124,9 +131,11 @@ public class Controller {
         System.out.println("Enter how much money you want to transfer:\n>");
         int amount = scanner.nextInt();
         if (card.subtractFromBalance(amount)) {
-            jdbcCardDAO.subtractFromBalance(amount, card.getNumber());
-            jdbcCardDAO.addToBalance(amount, cardNumberInput);
-            System.out.println("Success!");
+            if (jdbcCardDAO.transferMoney(amount, card.getNumber(), cardNumberInput)) {
+                System.out.println("Success!");
+            } else {
+                System.out.println("Operation aborted.");
+            }
         } else {
             System.out.println("Not enough money!");
         }
